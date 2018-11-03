@@ -69,8 +69,9 @@ class GcodeExport(inkex.Effect):
 		# Mirror Y
 		self.OptionParser.add_option("","--flip_y",action="store", type="inkbool", dest="flip_y", default=False,help="")
 		
-		# Homing
-		self.OptionParser.add_option("","--homing",action="store", type="int", dest="homing", default="1",help="")
+		
+		
+		self.OptionParser.add_option("","--height",action="store", type="int", dest="height", default="1",help="") 
 
 		# Commands
 		self.OptionParser.add_option("","--laseron", action="store", type="string", dest="laseron", default="M03", help="")
@@ -146,7 +147,7 @@ class GcodeExport(inkex.Effect):
 			
 			pos_file_png_exported = os.path.join(self.options.directory,self.options.filename+".png") 
 			pos_file_png_BW = os.path.join(self.options.directory,self.options.filename+suffix+"preview.png") 
-			pos_file_gcode = os.path.join(self.options.directory,self.options.filename+suffix+"gcode.txt") 
+			pos_file_gcode = os.path.join(self.options.directory,self.options.filename+suffix+".gcode") 
 			
 
 			#Esporto l'immagine in PNG
@@ -426,16 +427,13 @@ class GcodeExport(inkex.Effect):
 			
 			#Configurazioni iniziali standard Gcode
 			file_gcode.write('; Generated with:\n; "Raster 2 Laser Gcode generator"\n; by 305 Engineering\n;\n;\n;\n')
-			#HOMING
-			if self.options.homing == 1:
-				file_gcode.write('G28; home all axes\n')
-			elif self.options.homing == 2:
-				file_gcode.write('$H; home all axes\n')
-			else:
-				pass
+			file_gcode.write(self.options.laseroff + '\n')
+			file_gcode.write('G28; \n');
 			file_gcode.write('G21; Set units to millimeters\n')			
 			file_gcode.write('G90; Use absolute coordinates\n')				
-			file_gcode.write('G92; Coordinate Offset\n')	
+			file_gcode.write('G92; Coordinate Offset\n')
+			file_gcode.write('G01 Z' + str(float(self.options.height)) + '\n')
+			file_gcode.write('M0\n')
 
 			#Creazione del Gcode
 			
@@ -538,14 +536,6 @@ class GcodeExport(inkex.Effect):
 			
 			#Configurazioni finali standard Gcode
 			file_gcode.write('G00 X0 Y0; home\n')
-			#HOMING
-			if self.options.homing == 1:
-				file_gcode.write('G28; home all axes\n')
-			elif self.options.homing == 2:
-				file_gcode.write('$H; home all axes\n')
-			else:
-				pass
-			
 			file_gcode.close() #Chiudo il file
 
 
@@ -562,7 +552,6 @@ def _main():
 
 if __name__=="__main__":
 	_main()
-
 
 
 
